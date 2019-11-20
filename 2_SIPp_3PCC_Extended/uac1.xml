@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE scenario SYSTEM "sipp.dtd">
+<scenario name="Basic 3pcc extended scenario">
+  <send retrans="500">
+    <![CDATA[
+
+      INVITE sip:+17242455555@192.168.55.62:5070 SIP/2.0
+      Via: SIP/2.0/[transport] 192.168.55.62:[local_port];branch=[branch]
+      From: <sip:+17661112233@192.168.55.62:[local_port];transport=[transport]>;tag=PersistentFromTagForTestingOnly123
+      To: <sip:+17242455555@192.168.55.62:5070>
+      Call-ID: [call_id]
+      CSeq: 1 INVITE
+      Contact: <sip:+17661112233@192.168.55.62:[local_port];transport=[transport]>
+      Max-Forwards: 70
+      Allow: INVITE,ACK,CANCEL,BYE,REGISTER,REFER,INFO,SUBSCRIBE,NOTIFY,PRACK,UPDATE,OPTIONS
+      Content-Type: application/sdp
+      Content-Length: [len]
+
+      v=0
+      o=Sonus_UAC 265 9626 IN IP[local_ip_type] 192.168.55.62
+      s=SIP Media Capabilities
+      c=IN IP[media_ip_type] 192.168.55.62
+      t=0 0
+      m=audio 10000 RTP/AVP 8 18 0 101
+      a=rtpmap:8 PCMA/8000
+      a=rtpmap:18 G729/8000
+      a=fmtp:18 annexb=no
+      a=rtpmap:0 PCMA/8000
+      a=rtpmap:101 telephone-event/8000
+      a=fmtp:101 0-15
+      a=sendrecv
+      a=rtcp:52370 IN IP4 10.0.2.15
+      a=maxptime:60
+      
+    ]]>
+  </send>
+
+  <recv response="100"
+        optional="true">
+  </recv>
+  
+  <recv response="180" optional="true">
+  </recv>
+
+  <recv response="183" optional="true">
+  </recv>
+
+  <recv response="200" rtd="true" rrs="true">
+    <action>
+    <ereg regexp="branch=(.*)" search_in="hdr" header="Via:" check_it="false" assign_to="2,3" />  <!-- find branch -->
+    </action>
+  </recv>
+
+  <!-- get rid of a mistake: "Variable $2 is referenced 1 times!" -->
+  <nop>
+    <action>
+      <assign assign_to="2" value="0" /> 
+    </action>
+  </nop>
+
+  <pause milliseconds="3500"/>
+  <send>
+    <![CDATA[
+
+      ACK sip:+17242455555@192.168.55.62:5070 SIP/2.0
+      [routes]
+      Via: SIP/2.0/[transport] 192.168.55.62:[local_port];branch=[$3]
+      [last_From:]
+      [last_To:]
+      [last_Call-ID:]
+      CSeq: 1 ACK
+      Max-Forwards: 70
+      Content-Length: 0
+
+    ]]>
+  </send>
+
+  <pause milliseconds="900"/>
+<!-- Send re-Invite -->
+  <send retrans="500">
+    <![CDATA[
+
+      INVITE sip:+17242455555@192.168.55.62:5070 SIP/2.0
+      [routes]
+      Via: SIP/2.0/[transport] 192.168.55.62:[local_port];branch=[branch]
+      [last_From:]
+      [last_To:]
+      [last_Call-ID:]
+      CSeq: 2 INVITE
+      Contact: <sip:+17661112233@192.168.55.62:[local_port];transport=[transport]>
+      Max-Forwards: 70
+      Allow: INVITE,ACK,CANCEL,BYE,REGISTER,REFER,INFO,SUBSCRIBE,NOTIFY,PRACK,UPDATE,OPTIONS
+      Content-Type: application/sdp
+      Content-Length: [len]
+
+      v=0
+      o=1st_reInvite!!! 265 9627 IN IP[local_ip_type] 192.168.55.62
+      s=SIP 1st reInvite!!!
+      c=IN IP[media_ip_type] 192.168.55.62
+      t=0 0
+      m=audio 10002 RTP/AVP 8 18 0 101
+      a=rtpmap:8 PCMA/8000
+      a=rtpmap:18 G729/8000
+      a=fmtp:18 annexb=no
+      a=rtpmap:0 PCMA/8000
+      a=rtpmap:101 telephone-event/8000
+      a=fmtp:101 0-15
+      a=sendrecv
+      a=rtcp:56420 IN IP4 10.0.2.100
+      a=maxptime:60
+      
+    ]]>
+  </send>
+
+  <recv response="100" optional="true">
+  </recv>
+  
+  <recv response="180" optional="true">
+  </recv>
+  <recv response="183" optional="true">
+  </recv>
+
+  <recv response="200" rtd="true">
+  </recv>
+
+<!-- Communicate with second instance of SIPp -->
+  <sendCmd dest="s1">
+    <![CDATA[
+
+      From: m   <!-- this mandatory header for 3PCC Extended! From documentation:  Note that the message must contain a "From" field, filled with the name of the sender. -->
+      [last_message]
+
+     ]]>
+  </sendCmd>
+  <pause milliseconds="300000"/>
+</scenario>
+

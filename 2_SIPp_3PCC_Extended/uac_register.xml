@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE scenario SYSTEM "sipp.dtd">
+
+<!-- This program is free software; you can redistribute it and/or      -->
+<!-- modify it under the terms of the GNU General Public License as     -->
+<!-- published by the Free Software Foundation; either version 2 of the -->
+<!-- License, or (at your option) any later version.                    -->
+<!--                                                                    -->
+<!-- This program is distributed in the hope that it will be useful,    -->
+<!-- but WITHOUT ANY WARRANTY; without even the implied warranty of     -->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      -->
+<!-- GNU General Public License for more details.                       -->
+<!--                                                                    -->
+<!-- You should have received a copy of the GNU General Public License  -->
+<!-- along with this program; if not, write to the                      -->
+<!-- Free Software Foundation, Inc.,                                    -->
+<!-- 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA             -->
+<!--                                                                    -->
+<!--                 Sipp default 'branchc' scenario.                   -->
+<!--                                                                    -->
+
+<scenario name="branch_client">
+  <send retrans="500">
+    <![CDATA[
+
+      REGISTER sip:10.62.22.119 SIP/2.0
+      Via: SIP/2.0/[transport] 192.168.55.62:[local_port];branch=[branch]
+      From: +17661112233 <sip:+17661112233@10.62.22.119:5060>;tag=[pid]SIPpTag07[call_number]
+      To: +17661112233 <sip:+17661112233@10.62.22.119:5060>
+      Call-ID: [call_id]
+      CSeq: 1 REGISTER
+      Contact: sip:+17661112233@192.168.55.62:[local_port]
+      Content-Length: 0
+      Expires: 3600
+
+    ]]>
+  </send>
+
+  <!-- simple case - just jump over a line   -->
+  <recv response="200" rtd="true" next="5">
+  </recv>
+
+  <recv response="200">
+  </recv>
+
+  <label id="5"/>
+
+</scenario>
+

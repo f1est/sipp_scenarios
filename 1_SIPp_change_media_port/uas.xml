@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE scenario SYSTEM "sipp.dtd">
+<scenario name="Basic UAS responder">
+
+  <recv request="INVITE" crlf="true">
+    <action>
+    <ereg regexp=".*" search_in="hdr" header="From:" check_it="true" assign_to="1" />
+    <ereg regexp=".*" search_in="hdr" header="To:" check_it="true" assign_to="2" />
+    <ereg regexp=".*" search_in="hdr" header="Call-ID:" check_it="true" assign_to="3" />
+    <ereg regexp=".*" search_in="hdr" header="Record-Route:" check_it="false" assign_to="4" />
+    </action>
+  </recv>
+  
+  <send>
+    <![CDATA[
+
+      SIP/2.0 180 Ringing
+      [last_Via:]
+      [last_From:]
+      [last_To:];tag=[pid]SIPpTag01[call_number]
+      [last_Call-ID:]
+      [last_CSeq:]
+      Contact: <sip:192.168.55.62:[local_port];transport=[transport]>
+      Content-Length: 0
+
+    ]]>
+  </send>
+
+  <send retrans="500">
+    <![CDATA[
+
+      SIP/2.0 200 OK
+      [last_Via:]
+      [last_From:]
+      [last_To:];tag=[pid]SIPpTag01[call_number]
+      [last_Call-ID:]
+      [last_CSeq:]
+      Contact: <sip:192.168.55.62:[local_port];transport=[transport]>
+      Content-Type: application/sdp
+      Content-Length: [len]
+
+      v=0
+      o=Sonus_UAC 265 9626 IN IP[local_ip_type] 192.168.55.62
+      s=SIP Media Capabilities
+      c=IN IP[media_ip_type] 192.168.55.62
+      t=0 0
+      m=audio 10000 RTP/AVP 8 18 101
+      a=rtpmap:8 PCMA/8000
+      a=rtpmap:18 G729/8000
+      a=fmtp:18 annexb=no
+      a=rtpmap:101 telephone-event/8000
+      a=fmtp:101 0-15
+      a=sendrecv
+      a=ptime:20
+
+    ]]>
+  </send>
+
+  <recv request="ACK"
+        rtd="true"
+        crlf="true">
+  </recv>
+<!--  
+  <ResponseTimeRepartition value="10, 20, 30, 40, 50, 100, 150, 200"/>
+  <CallLengthRepartition value="10, 50, 100, 500, 1000, 5000, 10000"/>
+-->
+  
+  <pause milliseconds="2000"/>
+
+<!-- Send re-Invite -->
+  <send retrans="500">
+    <![CDATA[
+
+      INVITE sip:+18772004253@192.168.55.62:5070 SIP/2.0
+      Route: [$4] 
+      Via: SIP/2.0/[transport] 192.168.55.62:[local_port];branch=[branch]
+      From: [$2];tag=[pid]SIPpTag01[call_number]
+      To: [$1]
+      Call-ID: [$3]
+      CSeq: 1 INVITE
+      Contact: <sip:+17661112233@192.168.55.62:[local_port];transport=[transport]>
+      Max-Forwards: 70
+      Allow: INVITE,ACK,CANCEL,BYE,REGISTER,REFER,INFO,SUBSCRIBE,NOTIFY,PRACK,UPDATE,OPTIONS
+      Accept: application/sdp, application/isup, application/dtmf, application/dtmf-relay, multipart/mixed
+      Supported: timer,100rel
+      Session-Expires: 120;refresher=uas
+      Min-SE: 90
+      Content-Type: application/sdp
+      Content-Disposition: session; handling=required
+      Content-Length: [len]
+
+      v=0
+      o=Sonus_UAC_reInvite!!! 265 9627 IN IP[local_ip_type] 192.168.55.62
+      s=SIP Media C reInvite!!!
+      c=IN IP[media_ip_type] 192.168.55.62
+      t=0 0
+      m=audio 10002 RTP/AVP 8 101
+      a=rtpmap:8 PCMA/8000
+      a=rtpmap:101 telephone-event/8000
+      a=fmtp:101 0-15
+      a=sendrecv
+      a=ptime:20
+
+    ]]>
+  </send>
+
+  <recv response="100"
+        optional="true">
+  </recv>
+
+  <recv response="180" optional="true">
+  </recv>
+
+  <recv response="183" optional="true">
+  </recv>
+
+  <recv response="200" rtd="true">
+  </recv>
+
+  <send>
+    <![CDATA[
+
+      ACK sip:+18772004253@192.168.55.62:5070 SIP/2.0
+      Route: [$4] 
+      [last_Via:]
+      [last_From:]
+      [last_To:]
+      [last_Call-ID:]
+      CSeq: 1 ACK
+      Max-Forwards: 70
+      Content-Length: 0
+
+    ]]>
+  </send>
+</scenario>
+
