@@ -11,17 +11,26 @@
     </action>
   </recvCmd>
 
+<nop>
+  <action>
+      <assignstr assign_to="2" value="[$1]"/>
+      <log message="value of variable 2 is : [$2]"/>
+  </action>
+</nop>
+  
+  <pause milliseconds="3900"/>
+
 <!-- Send second re-Invite
 !!! ATTENTION !!!
 If you want use proxy, please add header Route in Invite request:
-Route:[$1]
+Route:[$2]
 If you NOT use proxy, please remove header Route from Invite request if it is present
  -->
   <send retrans="500">
     <![CDATA[
 
       INVITE sip:+17242455555@192.168.55.62:5070 SIP/2.0
-      Route: [$1] 
+      Route:[$2]
       Via: SIP/2.0/[transport] 192.168.55.62:[local_port];branch=[branch]
       From: <sip:+17661112233@192.168.55.62>;tag=PersistentFromTagForTestingOnly123
       To:[$3]
@@ -38,7 +47,7 @@ If you NOT use proxy, please remove header Route from Invite request if it is pr
       s=SIP 2nd reInvite!!!
       c=IN IP[media_ip_type] 192.168.55.62
       t=0 0
-      m=audio 10004 RTP/AVP 8 18 0 101
+      m=audio 10020 RTP/AVP 8 18 0 101
       a=rtpmap:8 PCMA/8000
       a=rtpmap:18 G729/8000
       a=fmtp:18 annexb=no
@@ -55,7 +64,23 @@ If you NOT use proxy, please remove header Route from Invite request if it is pr
   <recv response="100" optional="true">
   </recv>
 
+<!--
+  <recv response="491" >
+    <action>
+    <ereg regexp="branch=(.*)" search_in="hdr" header="Via:" check_it="false" assign_to="5,6" /> 
+    </action>
+  </recv>
+-->  
+
+<!--
   <recv response="500" >
+    <action>
+    <ereg regexp="branch=(.*)" search_in="hdr" header="Via:" check_it="false" assign_to="5,6" /> 
+    </action>
+  </recv>
+-->  
+
+  <recv response="200" >
     <action>
     <ereg regexp="branch=(.*)" search_in="hdr" header="Via:" check_it="false" assign_to="5,6" />  <!-- find branch -->
     </action>

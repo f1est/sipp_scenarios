@@ -58,7 +58,7 @@
     </action>
   </nop>
 
-  <pause milliseconds="3500"/>
+  <pause milliseconds="1500"/>
   <send>
     <![CDATA[
 
@@ -75,7 +75,7 @@
     ]]>
   </send>
 
-  <pause milliseconds="900"/>
+  <pause milliseconds="3900"/>
 <!-- Send re-Invite -->
   <send retrans="500">
     <![CDATA[
@@ -98,7 +98,7 @@
       s=SIP 1st reInvite!!!
       c=IN IP[media_ip_type] 192.168.55.62
       t=0 0
-      m=audio 10002 RTP/AVP 8 18 0 101
+      m=audio 10010 RTP/AVP 8 18 0 101
       a=rtpmap:8 PCMA/8000
       a=rtpmap:18 G729/8000
       a=fmtp:18 annexb=no
